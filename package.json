@@ -1,6 +1,6 @@
 {
   "name": "generate-manifest",
-  "version": "1.0.3",
+  "version": "1.0.4",
   "description": "A tool to generate manifest form given url",
   "repository": "https://github.com/liyincheng/generate-manifest",
   "main": "index.js",

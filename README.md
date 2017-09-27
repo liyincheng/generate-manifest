@@ -2,7 +2,8 @@
 
 使用方法：
 ```shell
-node generate-manifest.js --url=https://github.com
+npm install -g generate-manifest
+generate-manifest --url=https://github.com
 ```
 
 --url 后面带上想要cached的网页地址
@@ -32,7 +33,7 @@ https://github.com/ /html/manifest/html/home.html
 ``` 
 可以支持定制参数：
 ```
-node generate-manifest.js --url=https://github.com #the url to fetch
+generate-manifest --url=https://github.com #the url to fetch
      --res=img,css,js,html  #the resource type to cache in manifest file
      --appcache=appache      #the manifestfile folder
      --html=html            #the fallback html folder
