@@ -9,7 +9,7 @@ if (!argv.url) {
 `usage1: node generate-manifest.js --url=https://github.com
 usage2: node generate-manifest.js --url=https://github.com #the url to fetch
              --res=img,css,js,html  #the resource type to cache in manifest file
-             --appache=appache      #the manifestfile folder
+             --appcache=appcache      #the manifestfile folder
              --html=html            #the fallback html folder
              --pageName=home        #the manifest/html file name
              --htmlPrefix=/html/manifest #fallback html folder

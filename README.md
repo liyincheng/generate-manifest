@@ -1,8 +1,8 @@
 一个用来生成manifest文件的工具，根据url抓取的html里的img/css/js资源放到manifest文件的cache里面
 
 使用方法：
-```bash
-usage1: node generate-manifest.js --url=https://github.com
+```shell
+node generate-manifest.js --url=https://github.com
 ```
 
 --url 后面带上想要cached的网页地址
@@ -30,6 +30,16 @@ NETWORK:
 FALLBACK
 https://github.com/ /html/manifest/html/home.html
 ``` 
+可以支持定制参数：
+```
+node generate-manifest.js --url=https://github.com #the url to fetch
+     --res=img,css,js,html  #the resource type to cache in manifest file
+     --appcache=appache      #the manifestfile folder
+     --html=html            #the fallback html folder
+     --pageName=home        #the manifest/html file name
+     --htmlPrefix=/html/manifest #fallback html folder
+```
+res指定需要cache的资源，默认是四种img,css,js,html，--appcache --html指定生成文件的存放目录，--pageName指定文件名称，--htmlPrefix指定FALLBACK里面html的访问路径，默认首页是使用home，其它页面使用路径/最后一个内容。
 
 
 
