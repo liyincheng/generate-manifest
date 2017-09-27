@@ -1,9 +1,10 @@
 {
   "name": "generate-manifest",
-  "version": "1.0.4",
+  "version": "1.0.8",
   "description": "A tool to generate manifest form given url",
   "repository": "https://github.com/liyincheng/generate-manifest",
   "main": "index.js",
+  "bin": {"generate-manifest": "index.js"},
   "scripts": {
     "test": "echo \"Error: no test specified\" && exit 1"
   },
