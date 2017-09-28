@@ -3,9 +3,9 @@
 A tool to generate manifest file from a given url. It will crawl the img/css/js resource link from the html.
 
 
-Usage:
-
 使用方法：
+
+Usage:
 
 ```shell
 npm install -g generate-manifest
