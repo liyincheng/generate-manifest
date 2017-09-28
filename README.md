@@ -1,17 +1,22 @@
+A tool to generate manifest file from a given url. It will crawl the img/css/js resource link from the html.
 一个用来生成manifest文件的工具，根据url抓取的html里的img/css/js资源放到manifest文件的cache里面
 
+Usage:
 使用方法：
 ```shell
 npm install -g generate-manifest
 generate-manifest --url=https://github.com
 ```
 
+--url with the url to process
 --url 后面带上想要cached的网页地址
 
+It will then generate two files:
 然后就会生成两个文件：
 * manifest文件 appcache/home.appcahe
 * FALLBACK的html文件 html/home.html
 
+The cache file structure:
 生成的appcache文件结构：
 ```
 CACHE MANIFEST
@@ -31,6 +36,8 @@ NETWORK:
 FALLBACK
 https://github.com/ /html/manifest/html/home.html
 ``` 
+
+More arguments to customize:
 可以支持定制参数：
 ```
 generate-manifest --url=https://github.com #the url to fetch
