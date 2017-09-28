@@ -5,16 +5,18 @@ const fetch = require("node-fetch-npm");
 const parser = require('cheerio');
 const argv = require('optimist').argv;
 const fs = require("fs");
+const urlParser = require("url");
 
 if (!argv.url) {
     console.log(
 `usage1: node generate-manifest.js --url=https://github.com
 usage2: node generate-manifest.js --url=https://github.com #the url to fetch
-             --res=img,css,js,html  #the resource type to cache in manifest file
-             --appcache=appcache      #the manifestfile folder
-             --html=html            #the fallback html folder
-             --pageName=home        #the manifest/html file name
-             --htmlPrefix=/html/manifest #fallback html folder
+             --res=img,css,js,html  # the resource type to cache in manifest file
+             --appcache=appcache    # the manifestfile folder
+             --html=html            # the fallback html folder
+             --pageName=home        # the manifest/html file name
+             --htmlPrefix=/html/manifest            # fallback html folder
+             --disableDomain=test1.com,test2.com    # not cache domain which not support CROS
 #usage2 will generate two files: appache/home.appache html/home.html\n
 `);
     return;
@@ -34,10 +36,18 @@ let util = {
     },
 
     /*
+     * 获取url的hostname
+     */
+    getHostName (urlAddr) {
+        let url = urlParser.parse(urlAddr);
+        return url.hostname || config.url.hostname;
+    },
+
+    /*
      * @return {String} 当前页面名称
      */
     getPageName (){
-        let url = require("url").parse(argv.url);
+        let url = urlParser.parse(argv.url);
         let path = url.path.replace(/\/$/, "");
         // 首页
         if (!path) {
@@ -65,12 +75,14 @@ let util = {
      * 创建html/appcache的目录
      * @param {String} dirPath 目录的路径
      */
-    createDir: function(dirPath) {
+    createDir (dirPath) {
         if (!util.dirExists(dirPath)){
             fs.mkdirSync(dirPath);
         } 
     }
+
 };
+
 
 var config = {
     url: require("url").parse(argv.url), // 网址
@@ -79,37 +91,31 @@ var config = {
     appcachePath: argv.appcache || "appcache",   // appcache的路径
     htmlPath: argv.html || "html",               // fallback html的路径
     pageName: argv.pageName || util.getPageName(),  // 当前页面名称，用来拼接html/manifest名称
-    htmlPrefix: argv.prefix || "/html/manifest"             // html访问路径前缀，用来拼接访问路径
+    htmlPrefix: argv.prefix || "/html/manifest",                // html访问路径前缀，用来拼接访问路径
+    disableDomain: argv.disableDomain ? argv.disableDomain.split(",") : []  // 对那些不支持CROS的不能使用manifest
 };
 
 
 let manifestHandler = {
-    getImgPath ($) {
-        let imgSrc = "";
-        let $imgs = $("img");
-        for (var i = 0; i < $imgs.length; i++) {
-            let src = $imgs.eq(i).attr("src");
-            if (src.indexOf(config.url.hostname) >= 0) {
-                imgSrc += src + "\n";
+    getResource ($, resType) {
+        let selectors = {
+            "img": "img",
+            "css": "link[rel=stylesheet]",
+            "js": "script[src]"
+        };
+        if (!selectors[resType]) {
+            console.error("Not support resource type: " + resType);
+            return;
+        }
+        let $res = $(selectors[resType]);
+        let resLinks = "#" + resType + "\n";
+        for (var i = 0; i < $res.length; i++) {
+            let link = resType === "css" ? $res.eq(i).attr("href") : $res.eq(i).attr("src")
+            if (config.disableDomain.indexOf(util.getHostName(link)) < 0 ) {
+                resLinks += link + "\n";
             }
-        } 
-        return imgSrc;
-    },
-    getCSSPath ($) {
-        let cssLink = "";
-        let $css = $("link[rel=stylesheet]");
-        for (var i = 0; i < $css.length; i++) {
-            cssLink += $css.eq(i).attr("href") + "\n";
         }
-        return cssLink;
-    },
-    getJSPath ($) {
-        let jsLink = "";
-        let $js = $("script[src]");
-        for (var i = 0; i < $js.length; i++) {
-            jsLink += $js.eq(i).attr("src") + "\n";
-        }
-        return jsLink;
+        return resLinks;
     }
 };
 
@@ -127,27 +133,15 @@ let writeWorker = {
             out.write("#html\n");
             out.write(config.url.href + "\n");
         }
-
-        // img
-        if (resources.indexOf("img") >= 0) {
-            out.write("#img\n");
-            let imgLink = manifestHandler.getImgPath($);
-            out.write(imgLink);
+   
+        let links = "";
+        for (let i = 0; i < resources.length; i++) {
+            if (resources[i] !== "html") {
+                links += manifestHandler.getResource($, resources[i]);
+            }
         }
 
-        // css
-        if (resources.indexOf("css") >= 0) {
-            out.write("#css\n");
-            let cssLink = manifestHandler.getCSSPath($);
-            out.write(cssLink);
-        }
-        
-        // js
-        if (resources.indexOf("js") >= 0) {
-            out.write("#js\n");
-            let jsLink = manifestHandler.getJSPath($);
-            out.write(jsLink);
-        }
+        out.write(links);
 
         // network
         out.write("\nNETWORK:\n*\n");
